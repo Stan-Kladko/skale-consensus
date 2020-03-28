@@ -38,6 +38,7 @@
 #include "exceptions/InvalidSchainIndexException.h"
 #include "exceptions/InvalidSourceIPException.h"
 #include "exceptions/OldBlockIDException.h"
+#include "exceptions/FutureBlockIDException.h"
 #include "exceptions/PingException.h"
 #include "node/NodeInfo.h"
 
@@ -320,7 +321,7 @@ BlockProposalServerAgent::processProposalRequest(ptr<ServerConnection> _connecti
     auto transactionCount = partialHashesList->getTransactionCount();
 
     for (uint64_t i = 0; i < transactionCount; i++) {
-        auto h = partialHashesList->getPartialHash(i);
+        auto h = partialHashesList->getPartialHash(i);;
         ASSERT(h);
 
 
@@ -407,6 +408,15 @@ void BlockProposalServerAgent::checkForOldBlock(const block_id &_blockID) {
     if (_blockID <= getSchain()->getLastCommittedBlockID())
         BOOST_THROW_EXCEPTION(OldBlockIDException("Old block ID", nullptr, nullptr, __CLASS_NAME__));
 }
+
+void BlockProposalServerAgent::checkForFutureBlock(const block_id &_blockID) {
+    LOG(debug,
+        "BID:" + to_string(_blockID) + ":CBID:" + to_string(getSchain()->getLastCommittedBlockID()) + ":MQ:" +
+        to_string(getSchain()->getMessagesCount()));
+    if ((uint64_t) _blockID > (uint64_t) getSchain()->getLastCommittedBlockID() + 1)
+        BOOST_THROW_EXCEPTION(FutureBlockIDException("Future block ID", nullptr, nullptr, __CLASS_NAME__));
+}
+
 
 
 ptr<Header> BlockProposalServerAgent::createProposalResponseHeader(ptr<ServerConnection> _connectionEnvelope,
