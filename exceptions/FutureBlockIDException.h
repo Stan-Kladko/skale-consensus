@@ -37,7 +37,7 @@ public:
     }r
 
     ptr<ServerConnection> getConnection() const {
-        return connection;r
+        return connection;
     }
 
 private:
