@@ -37,6 +37,7 @@
 #include "chains/Schain.h"
 
 #include "exceptions/OldBlockIDException.h"
+#include "exceptions/FutureBlockIDException.h"
 #include "exceptions/CouldNotReadPartialDataHashesException.h"
 
 #include "libBLS/bls/BLSPrivateKeyShare.h"
