@@ -409,13 +409,6 @@ void BlockProposalServerAgent::checkForOldBlock(const block_id &_blockID) {
         BOOST_THROW_EXCEPTION(OldBlockIDException("Old block ID", nullptr, nullptr, __CLASS_NAME__));
 }
 
-void BlockProposalServerAgent::checkForFutureBlock(const block_id &_blockID) {
-    LOG(debug,
-        "BID:" + to_string(_blockID) + ":CBID:" + to_string(getSchain()->getLastCommittedBlockID()) + ":MQ:" +
-        to_string(getSchain()->getMessagesCount()));
-    if ((uint64_t) _blockID > (uint64_t) getSchain()->getLastCommittedBlockID() + 1)
-        BOOST_THROW_EXCEPTION(FutureBlockIDException("Future block ID", nullptr, nullptr, __CLASS_NAME__));
-}
 
 
 
@@ -460,6 +453,11 @@ ptr<Header> BlockProposalServerAgent::createProposalResponseHeader(ptr<ServerCon
         return responseHeader;
     }
 
+    if ((uint64_t) sChain->getLastCommittedBlockID()  + 1 < _header.getBlockId()) {
+        responseHeader->setStatusSubStatus(CONNECTION_RETRY_LATER, CONNECTION_BLOCK_PROPOSAL_IN_THE_FUTURE);
+        responseHeader->setComplete();
+        return responseHeader;
+    }
 
     ASSERT(_header.getTimeStamp() > MODERN_TIME);
 
@@ -541,6 +539,12 @@ ptr<Header> BlockProposalServerAgent::createDAProofResponseHeader(ptr<ServerConn
 
     if (sChain->getLastCommittedBlockID() >= _header.getBlockId()) {
         responseHeader->setStatusSubStatus(CONNECTION_DISCONNECT, CONNECTION_BLOCK_PROPOSAL_TOO_LATE);
+        responseHeader->setComplete();
+        return responseHeader;
+    }
+
+    if ((uint64_t) sChain->getLastCommittedBlockID()  + 1 < _header.getBlockId()) {
+        responseHeader->setStatusSubStatus(CONNECTION_RETRY_LATER, CONNECTION_BLOCK_PROPOSAL_IN_THE_FUTURE);
         responseHeader->setComplete();
         return responseHeader;
     }
