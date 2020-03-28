@@ -16,9 +16,9 @@
     You should have received a copy of the GNU Affero General Public License
     along with skale-consensus.  If not, see <https://www.gnu.org/licenses/>.
 
-    @file OldBlockIDException.h
+    @file FutureBlockIDException.h
     @author Stan Kladko
-    @date 2018
+    @date 2020
 */
 
 #pragma  once
